@@ -39,7 +39,7 @@ class MethodSignature
             function (ReflectionParameter $param): string {
                 $str = '';
                 $type = $param->getType();
-                $typeName = $this->ensureValidFQCN($type->getName());
+                $typeName = $this->ensureValidParamTypeString($type);
 
                 if (
                     $type
@@ -69,8 +69,13 @@ class MethodSignature
         return implode(', ', $paramStrings);
     }
 
-    private function ensureValidFQCN(string $typeName): string
+    private function ensureValidParamTypeString(\ReflectionType $type): string
     {
+        if ($type instanceof \ReflectionUnionType) {
+            return implode('|', array_map([$this, 'ensureValidParamTypeString'], $type->getTypes()));
+        }
+        assert($type instanceof ReflectionNamedType);
+        $typeName = $type->getName();
         if (class_exists($typeName) || interface_exists($typeName)) {
             $typeName = '\\' . $typeName;
         }
@@ -86,7 +91,7 @@ class MethodSignature
 
         return sprintf(
             ': %s',
-            $this->ensureValidFQCN($type->getName())
+            $this->ensureValidParamTypeString($type)
         );
     }
 }
