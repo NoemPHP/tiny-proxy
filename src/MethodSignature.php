@@ -17,20 +17,25 @@ class MethodSignature
      */
     private $method;
 
-    public function __construct(ReflectionMethod $method)
+    public function __construct(\ReflectionFunctionAbstract $method)
     {
         $this->method = $method;
     }
 
     public function __toString(): string
     {
-        return sprintf(
-            '%s function %s(%s)%s',
-            implode(' ', Reflection::getModifierNames($this->method->getModifiers())),
+        $function = sprintf(
+            'function %s(%s)%s',
             $this->method->getShortName(),
             $this->renderParamSignature(),
             $this->renderReturnType()
         );
+        if ($this->method instanceof ReflectionMethod) {
+            $modifiers = implode(' ', Reflection::getModifierNames($this->method->getModifiers()));
+
+            $function = $modifiers . ' ' . $function;
+        }
+        return $function;
     }
 
     private function renderParamSignature(): string
