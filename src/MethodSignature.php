@@ -26,15 +26,18 @@ class MethodSignature
     {
         $function = sprintf(
             'function %s(%s)%s',
-            $this->method->getShortName(),
+            !$this->method->isClosure()
+                ? $this->method->getShortName()
+                : '',
             $this->renderParamSignature(),
             $this->renderReturnType()
         );
         if ($this->method instanceof ReflectionMethod) {
             $modifiers = implode(' ', Reflection::getModifierNames($this->method->getModifiers()));
 
-            $function = $modifiers . ' ' . $function;
+            $function = $modifiers.' '.$function;
         }
+
         return $function;
     }
 
